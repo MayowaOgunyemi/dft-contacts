@@ -16,7 +16,12 @@ class ContactData extends Data
         public string $phone,
         public ?string $address
     ){}
-
+    
+    /**
+     * Method rules
+     * Description: Get the validation rules that apply to the data.
+     * @return array
+     */
     public static function rules(): array
     {
         return [
