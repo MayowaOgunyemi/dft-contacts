@@ -12,6 +12,5 @@ interface ContactRepositoryInterface
     public function update(int $id, ContactData $contactData): ContactData;
     public function delete(int $id): void;
     public function findById(int $id): ?ContactData;
-    public function findByEmail(string $email): ContactData;
     public function search(string $contactData): LengthAwarePaginator;
 }
