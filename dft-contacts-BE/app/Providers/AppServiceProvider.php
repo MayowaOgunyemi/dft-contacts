@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind the repository interface to its concrete implementation
+        $this->app->bind(ContactRepositoryInterface::class, ContactRepository::class);
+
+        // Bind the service interface to its concrete implementation
+        $this->app->bind(ContactServiceInterface::class, ContactService::class);
     }
 
     /**
