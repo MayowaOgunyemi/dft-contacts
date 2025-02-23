@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Interfaces\Interfaces;
+namespace App\Interfaces;
 
 use App\Data\ContactData;
 use Illuminate\Pagination\LengthAwarePaginator;

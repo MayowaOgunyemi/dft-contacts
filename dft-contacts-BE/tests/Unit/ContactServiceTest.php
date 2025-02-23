@@ -8,6 +8,7 @@ use App\Data\ContactData;
 use PHPUnit\Framework\TestCase;
 use App\Services\ContactService;
 use App\Interfaces\ContactRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ContactServiceTest extends TestCase
 {
@@ -36,7 +37,7 @@ class ContactServiceTest extends TestCase
         $this->mockRepository
             ->shouldReceive('getAll')
             ->once()
-            ->andReturn($contacts);
+            ->andReturn(new LengthAwarePaginator($contacts, 5, 15));
         // Act
         $response = $this->contactService->getAllContacts();
 
@@ -59,12 +60,12 @@ class ContactServiceTest extends TestCase
             ->shouldReceive('create')
             ->once()
             ->with($contactData)
-            ->andReturn($contact);
+            ->andReturn($contactData);
         // Act
         $response = $this->contactService->createContact($contactData);
 
         // Assert
-        $this->assertEquals($contact, $response);
+        $this->assertEquals($contactData, $response);
     }
 
     /**
@@ -76,18 +77,18 @@ class ContactServiceTest extends TestCase
     public function test_can_update_contact(): void
     {
         // Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
         $updatedData = ContactData::from($contact);
         $this->mockRepository
             ->shouldReceive('update')
             ->once()
             ->with($contact->id, $updatedData)
-            ->andReturn($contact);
+            ->andReturn($updatedData);
         // Act
         $response = $this->contactService->updateContact($contact->id, $updatedData);
 
         // Assert
-        $this->assertEquals($contact, $response);
+        $this->assertEquals($updatedData, $response);
     }
 
     /**
@@ -99,7 +100,7 @@ class ContactServiceTest extends TestCase
     public function test_can_delete_contact(): void
     {
         // Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
         $this->mockRepository
             ->shouldReceive('delete')
             ->once()
@@ -120,17 +121,18 @@ class ContactServiceTest extends TestCase
     public function test_can_find_contact_by_id(): void
     {
         // Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
+        $contactData = ContactData::from($contact);
         $this->mockRepository
             ->shouldReceive('findById')
             ->once()
             ->with($contact->id)
-            ->andReturn($contact);
+            ->andReturn($contactData);
         // Act
         $response = $this->contactService->findContactById($contact->id);
 
         // Assert
-        $this->assertEquals($contact->id, $response->id);
+        $this->assertEquals($contactData, $response);
     }
 
     /**
@@ -148,7 +150,7 @@ class ContactServiceTest extends TestCase
             ->shouldReceive('search')
             ->once()
             ->with($searchTerm)
-            ->andReturn($contacts);
+            ->andReturn(new LengthAwarePaginator($contacts, 5, 15));
         // Act
         $response = $this->contactService->searchContacts($searchTerm);
 
@@ -169,7 +171,7 @@ class ContactServiceTest extends TestCase
         $this->mockRepository
             ->shouldReceive('getAll')
             ->once()
-            ->andReturn(collect());
+            ->andReturn(new LengthAwarePaginator([], 0, 15));
         // Act
         $response = $this->contactService->getAllContacts();
 
@@ -309,7 +311,7 @@ class ContactServiceTest extends TestCase
             ->shouldReceive('search')
             ->once()
             ->with($searchTerm)
-            ->andReturn(collect());
+            ->andReturn(new LengthAwarePaginator([], 0, 15));
 
         // Act
         $response = $this->contactService->searchContacts($searchTerm); 
