@@ -13,6 +13,7 @@ interface ContactRepositoryInterface
      * @return LengthAwarePaginator
      */
     public function getAll(): LengthAwarePaginator;    
+
     /**
      * Method create
      * Description: Create a new contact
@@ -21,6 +22,7 @@ interface ContactRepositoryInterface
      * @return ContactData
      */
     public function create(ContactData $contactData): ContactData;    
+
     /**
      * Method update
      * Description: Update an existing contact
@@ -30,6 +32,7 @@ interface ContactRepositoryInterface
      * @return ContactData
      */
     public function update(int $id, ContactData $contactData): ContactData;    
+
     /**
      * Method delete
      * Description: Delete an existing contact
@@ -38,6 +41,7 @@ interface ContactRepositoryInterface
      * @return void
      */
     public function delete(int $id): void;    
+
     /**
      * Method findById
      * Description: Find a contact by its ID
@@ -46,6 +50,18 @@ interface ContactRepositoryInterface
      * @return ContactData
      */
     public function findById(int $id): ?ContactData;    
+
+        
+    /**
+     * Method findByEmail
+     * Description: Find a contact by its email
+     *
+     * @param string $email [explicite description]
+     *
+     * @return ContactData
+     */
+    public function findByEmail(string $email): ?ContactData;
+
     /**
      * Method search
      * Description: Search for contacts by a given search term

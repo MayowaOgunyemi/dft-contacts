@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\Contact;
 use App\Data\ContactData;
 use Illuminate\Foundation\Testing\WithFaker;
-use App\Interfaces\Interfaces\ContactServiceInterface;
+use App\Interfaces\ContactServiceInterface;
 
 class ContactControllerTest extends TestCase
 {

@@ -16,7 +16,8 @@ class ContactRepository implements ContactRepositoryInterface
      */
     public function getAll(): LengthAwarePaginator
     {
-        return Contact::orderBy('id', 'desc')->paginate();
+        $contacts = Contact::orderBy('id', 'desc')->paginate();
+        return $contacts;
     }
 
     /**
@@ -74,6 +75,20 @@ class ContactRepository implements ContactRepositoryInterface
     public function findById(int $id): ?ContactData
     {
         $contact = Contact::find($id);
+        return $contact ? ContactData::from($contact) : null;
+    }
+    
+    /**
+     * Method findByEmail
+     * Description: Find a contact by its email
+     *
+     * @param string $email [explicite description]
+     *
+     * @return ContactData
+     */
+    public function findByEmail(string $email): ?ContactData
+    {
+        $contact = Contact::where('email', $email)->first();
         return $contact ? ContactData::from($contact) : null;
     }
 
