@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Contact;
+use App\Data\ContactData;
 use App\Interfaces\ContactRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 

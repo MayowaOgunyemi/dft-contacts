@@ -3,9 +3,11 @@
 namespace Tests\Unit;
 
 use Mockery;
+use Tests\TestCase;
 use App\Models\Contact;
+// use PHPUnit\Framework\TestCase;
 use App\Data\ContactData;
-use PHPUnit\Framework\TestCase;
+use Exception;
 use App\Services\ContactService;
 use App\Interfaces\ContactRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -57,6 +59,11 @@ class ContactServiceTest extends TestCase
         $contact = Contact::factory()->make();
         $contactData = ContactData::from($contact);
         $this->mockRepository
+            ->shouldReceive('findByEmail')
+            ->once()
+            ->with($contactData->email)
+            ->andReturn(null);
+        $this->mockRepository
             ->shouldReceive('create')
             ->once()
             ->with($contactData)
@@ -79,6 +86,11 @@ class ContactServiceTest extends TestCase
         // Arrange
         $contact = Contact::factory()->make(['id' => 1]);
         $updatedData = ContactData::from($contact);
+        $this->mockRepository
+            ->shouldReceive('findById')
+            ->once()
+            ->with($contact->id)
+            ->andReturn($updatedData);
         $this->mockRepository
             ->shouldReceive('update')
             ->once()
@@ -189,15 +201,22 @@ class ContactServiceTest extends TestCase
     public function test_fails_when_required_fields_are_missing(): void
     {
         // Arrange
-        $contactData = ContactData::from([]);
+        $contact = Contact::factory()->make();
+        $contactData = ContactData::from($contact);
+        unset($contactData->fname);
+        $this->mockRepository
+            ->shouldReceive('findByEmail')
+            ->once()
+            ->with($contactData->email)
+            ->andReturn(null);
         $this->mockRepository
             ->shouldReceive('create')
             ->once()
             ->with($contactData)
-            ->andThrow(new \InvalidArgumentException('Required fields are missing'));
+            ->andThrow(new \Exception('Required fields are missing'));
 
         // Act & Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Exception::class);
         $this->contactService->createContact($contactData);
     }
 
@@ -211,18 +230,18 @@ class ContactServiceTest extends TestCase
     public function test_fails_to_update_when_contact_id_does_not_exist(): void
     {
         // Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
         $contactData = ContactData::from($contact);
         $nonExistentId = 999;
-
         $this->mockRepository
-            ->shouldReceive('update')
+            ->shouldReceive('findById')
             ->once()
-            ->with($nonExistentId, $contactData)
-            ->andThrow(new \InvalidArgumentException('Contact not found'));
+            ->with($nonExistentId)
+            ->andReturn(null);
 
         // Act & Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("Contact with ID: {$nonExistentId} not found");
         $this->contactService->updateContact($nonExistentId, $contactData);
     }
 
@@ -237,17 +256,24 @@ class ContactServiceTest extends TestCase
     public function test_fails_when_invalid_data_is_provided_in_contact_data(): void
     {
         // Arrange
-        $contact = Contact::factory()->make();
-        $invalidData = ContactData::from([]);
+        $contact = Contact::factory()->make(['id' => 1]);
+        $invalidData = ContactData::from($contact);
+        unset($invalidData->email);
+        $this->mockRepository
+            ->shouldReceive('findById')
+            ->once()
+            ->with($contact->id)
+            ->andReturn($invalidData);
         $this->mockRepository
             ->shouldReceive('update')
             ->once()
             ->with($contact->id, $invalidData)
-            ->andThrow(new \InvalidArgumentException('Invalid data provided'));
+            ->andThrow(new \Exception('Invalid data provided'));
 
         // Act & Assert
-        $this->expectException(\InvalidArgumentException::class);
-        $this->contactService->updateContact($invalidData);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid data provided');
+        $this->contactService->updateContact($contact->id, $invalidData);
     }
 
     /**
@@ -265,10 +291,10 @@ class ContactServiceTest extends TestCase
             ->shouldReceive('delete')
             ->once()
             ->with($nonExistentId)
-            ->andThrow(new \InvalidArgumentException('Contact not found'));
+            ->andThrow(new \Exception('Contact not found'));
 
         // Act & Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Exception::class);
         $this->contactService->deleteContact($nonExistentId);
     }
 
