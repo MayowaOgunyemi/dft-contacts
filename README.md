@@ -102,7 +102,7 @@ Ensure you have the following installed:
   php artisan test
   ```
 **Controller Layer Unit Test**
-| Method | Endpoint             | Positive Test Cases ✅                 | Positive Test Cases ✅ |
+| Method | Endpoint             | Positive Test Cases ✅                 | Negative Test Cases ❌ |
 | ------ | -------------------- | -------------------------------------- | ----------------------------- |
 | GET    | `/api/contacts`      | ✅ Retrieve all contacts (paginated)   | ❌ Handle empty contact list |
 | GET    | `/api/contacts/{id}` | ✅ Retrieve an existing contact by ID  | ❌ Retrieve a non-existent contact by ID. |
@@ -112,7 +112,7 @@ Ensure you have the following installed:
 | GET    | `/api/contacts/search?q={term}` | ✅ Search contacts with a matching term (paginated). | ❌ Search with an empty or non-matching term. |
 
 **Service Layer Unit Test**
-| Method             | Positive Test Cases ✅                   | Positive Test Cases ✅ |
+| Method             | Positive Test Cases ✅                   | Negative Test Cases ❌ |
 | -------------------- | -------------------------------------- | ----------------------------- |
 | `getAllContacts()`    | ✅ Returns a paginated list of all contacts   | ❌ Returns an empty paginator when no contacts exist. |
 | `createContact(ContactData $contactData)` | ✅ Successfully creates a new contact using ContactData  | ❌ Fails when required fields in ContactData are missing. |
