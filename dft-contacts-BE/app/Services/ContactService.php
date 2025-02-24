@@ -42,7 +42,7 @@ class ContactService implements ContactServiceInterface
         //check if the contact already exists
         $existingContact = $this->contactRepository->findByEmail($contactData->email);
         if ($existingContact) {
-            throw new \Exception('Contact already exists');
+            throw new \Exception("Contact with email: {$contactData->email} already exists");
         }
         //create a new contact
         return $this->contactRepository->create($contactData);
