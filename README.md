@@ -11,7 +11,7 @@ This is a simple Contact List web application built using Laravel (backend) and 
 - **Live Search** for quick contact lookup
 - **Modals** for seamless add/edit/delete interactions
 - **Service & Repository Pattern** for a clean architecture
-- **Strict TDD Approach** with unit and feature tests
+- **Strict Adherence to TDD Approach** with unit and feature tests
 - **Deployment via Laravel Forge (AWS) & Vue.js on S3/CloudFront**
 
 ---
@@ -143,42 +143,62 @@ Ensure you have the following installed:
 
 ### Backend (Laravel) Deployment with Laravel Forge
 
-1. **Provision Server:** Create an AWS server using Laravel Forge.
-2. **Clone Repository:** Deploy code to Forge via GitHub.
-3. **Configure Environment:** Update `.env` variables.
-4. **Run Migrations:**
+1. **Provision Server:**
+   * Create an AWS EC2 instance (choose an appropriate instance type based on your expected traffic).
+   * Use Laravel Forge to provision and configure the EC2 instance (select your preferred PHP version and web server).
+2. **Clone Repository:**
+   * Connect your GitHub (or other version control) repository to Laravel Forge.
+   * Deploy your Laravel API code to the EC2 instance using Forge's deployment features.
+3. **Configure Environment:**
+   * Update the .env file on the server with your production environment variables (database credentials, API keys, etc.).
+   * Ensure APP_ENV=production and APP_DEBUG=false.
+4. **Run Migrations and seed data (if needed):**
    ```sh
-   php artisan migrate --seed
+   php artisan migrate --force
+   php artisan db:seed --force # If you need to seed data
    ```
+   * The --force flag is essential in production to bypass confirmation prompts.
 5. **Set Up Queue & Scheduler:**
    ```sh
-   php artisan queue:work
+   php artisan queue:work --daemon # If using queues
+   php artisan schedule:run # If using the scheduler, configure a cron job
    ```
-6. **Restart Services:** Restart Nginx & PHP-FPM.
-
+   * Configure a Supervisor process for queue:work to ensure it restarts if it crashes.
+   * Configure a cron job on the server to run php artisan schedule:run every minute.
+6. **Configure Web Server:**
+   * Ensure your web server (Nginx or Apache) is configured to point to the public directory of your Laravel application.
+   * Set up SSL certificates (if using HTTPS).
+7. **Restart Services:**
+   * Restart Nginx and PHP-FPM to apply configuration changes:
+   ```sh
+   sudo systemctl restart nginx
+   sudo systemctl restart php<version>-fpm # Replace <version> with your PHP version
+   ```
+8. **Configure CORS:**
+   * Ensure that CORS is configured correctly in your Laravel API to allow requests from your Vue.js frontend's CloudFront domain.
+   
 ### Frontend (Vue.js) Deployment on S3 & CloudFront
 
-1. Build the Vue.js project:
+1. **Build the Vue.js project**:
    ```sh
    npm run build
    ```
-2. Upload the `/dist` folder to an S3 bucket.
-3. Configure CloudFront for CDN distribution.
-4. Update environment variables to point to the S3 URL.
+2. **Create S3 Bucket:**
+   * Create an Amazon S3 bucket to store your Vue.js static files.
+   * Configure the bucket for static website hosting (optional, but recommended).
+3. **Upload the `/dist` folder to an S3 bucket:**
+   * Upload the contents of the /dist folder to your S3 bucket.
+   * Ensure that the bucket permissions are set to allow public read access (if needed).
+4. **Configure CloudFront for CDN distribution:**
+   * Create a CloudFront distribution that points to your S3 bucket as the origin.
+   * Configure CloudFront settings (e.g., caching, SSL certificates).
+   * Set the root object to index.html
+5. **Update environment variables to point to the S3 URL:**
+   * Update the vueJs environment variable to point to the Laravel API's production URL (e.g., using CloudFront or your API's domain).
+6. **Invalidate CloudFront Cache:**
+   * After uploading new files to S3, invalidate the CloudFront cache to ensure that users see the latest version of your application.
 
 ---
-
-## Version Control & Contribution
-
-- Follow the Git flow branching model.
-- Commit messages should follow conventional commit standards.
-- Open a pull request for feature additions or bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License.
 
 ## Author
 
