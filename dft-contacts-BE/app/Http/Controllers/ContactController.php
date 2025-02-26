@@ -32,7 +32,7 @@ class ContactController
     public function index()
     {
         $contacts = $this->contactService->getAllContacts();
-        return ContactData::collection($contacts);
+        return ContactData::collection($contacts->item());
     }
 
         
@@ -43,8 +43,9 @@ class ContactController
      * @param ContactData $contactData [explicite description]
      * @return ContactData
      */
-    public function store(ContactData $contactData)
+    public function store(Request $request)
     {
+        $contactData = ContactData::from($request->all());
         $contact = $this->contactService->createContact($contactData);
         return ContactData::from($contact);
     }
@@ -103,7 +104,8 @@ class ContactController
      */
     public function search(Request $request)
     {
-        $contacts = $this->contactService->searchContacts($request->all());
+        $term = $request->query('term'); // Get the term from query params
+        $contacts = $this->contactService->searchContacts(['term' => $term]);
         return ContactData::collection($contacts);
     }
 }

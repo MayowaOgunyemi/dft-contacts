@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use Mockery;
 use Tests\TestCase;
 use App\Models\Contact;
 use App\Data\ContactData;
-use Illuminate\Foundation\Testing\WithFaker;
 use App\Interfaces\ContactServiceInterface;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ContactControllerTest extends TestCase
 {
@@ -24,8 +26,10 @@ class ContactControllerTest extends TestCase
     {
         parent::setUp();
 
+        // $this->withoutMiddleware();
+
         // Mock the service interface
-        $this->mockService = $this->mock(ContactServiceInterface::class);
+        $this->mockService = Mockery::mock(ContactServiceInterface::class);
         $this->app->instance(ContactServiceInterface::class, $this->mockService);
     }
 
@@ -33,7 +37,7 @@ class ContactControllerTest extends TestCase
      * Method test_can_get_all_contacts
      * 
      * Description: Retrieve all contacts (paginated)
-     * @return void
+     * @return LengthAwarePaginator
      */
     #[Test]
     public function test_can_get_all_contacts(): void
@@ -43,13 +47,14 @@ class ContactControllerTest extends TestCase
         $this->mockService
             ->shouldReceive('getAllContacts')
             ->once()
-            ->andReturn($contacts);
+            ->andReturn(new LengthAwarePaginator($contacts, 5, 15));
 
         //Act
         $response = $this->getJson('/api/contacts');
 
         //Assert
         $response->assertStatus(200);
+        $response->assertJsonCount(5, 'data'); // Ensure the response contains 5 contacts
     }
 
     /**
@@ -69,7 +74,7 @@ class ContactControllerTest extends TestCase
             ->shouldReceive('createContact')
             ->once()
             ->with($data)
-            ->andReturn($contact);
+            ->andReturn($contactData);
 
         //Act
         $response = $this->postJson('/api/contacts', $data);
@@ -95,7 +100,7 @@ class ContactControllerTest extends TestCase
             ->shouldReceive('updateContact')
             ->once()
             ->with($contact->id, $data)
-            ->andReturn($contact);
+            ->andReturn($updatedData);
 
         //Act
         $response = $this->putJson("/api/contacts/{$contact->id}", $data);
@@ -114,7 +119,7 @@ class ContactControllerTest extends TestCase
     public function test_can_delete_contact(): void
     {
         //Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
         $this->mockService
             ->shouldReceive('deleteContact')
             ->once()
@@ -137,7 +142,7 @@ class ContactControllerTest extends TestCase
     public function test_can_find_contact_by_id(): void
     {
         //Arrange
-        $contact = Contact::factory()->make();
+        $contact = Contact::factory()->make(['id' => 1]);
         $this->mockService
             ->shouldReceive('findContactById')
             ->once()
@@ -261,14 +266,15 @@ class ContactControllerTest extends TestCase
     public function test_delete_a_non_existent_contact(): void
     {
         //Arrange
-        $contact = Contact::factory()->make();
+        $nonExistentId = 999;
+        // $contact = Contact::factory()->make(['id' => 1]);
         $this->mockService
             ->shouldReceive('deleteContact')
             ->once()
-            ->with($contact->id);
+            ->with($nonExistentId);
 
         //Act
-        $response = $this->deleteJson("/api/contacts/{$contact->id}");
+        $response = $this->deleteJson("/api/contacts/{$nonExistentId}");
 
         //Assert
         $response->assertStatus(404);
@@ -320,5 +326,12 @@ class ContactControllerTest extends TestCase
 
         //Assert
         $response->assertStatus(404);
-    }    
+    }  
+    
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
 }

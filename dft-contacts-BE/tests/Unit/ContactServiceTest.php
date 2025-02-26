@@ -29,7 +29,7 @@ class ContactServiceTest extends TestCase
     /**
      * Method test_can_get_all_contacts
      * Description: ✅ Returns a paginated list of all contacts.
-     * @return void
+     * @return LengthAwarePaginator
      */
     #[Test]
     public function test_can_get_all_contacts(): void
