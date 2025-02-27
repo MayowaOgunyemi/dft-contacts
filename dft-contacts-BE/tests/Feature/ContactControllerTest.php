@@ -67,7 +67,9 @@ class ContactControllerTest extends TestCase
     {
         //Arrange
         $contact = Contact::factory()->make();
-        $contactData = ContactData::from($contact)->toArray();
+        $data = $contact->toArray();
+        $contactData = ContactData::from($data);
+
         $this->mockService
             ->shouldReceive('createContact')
             ->once()
@@ -75,7 +77,7 @@ class ContactControllerTest extends TestCase
             ->andReturn($contactData);
 
         //Act
-        $response = $this->postJson('/api/contacts', $contactData);
+        $response = $this->postJson('/api/contacts', $data);
 
         //Assert
         $response->assertStatus(200);
@@ -194,7 +196,7 @@ class ContactControllerTest extends TestCase
         $this->mockService
             ->shouldReceive('getAllContacts')
             ->once()
-            ->andReturn(new LengthAwarePaginator([], 0, 15));
+            ->andThrow(new \Exception('No contacts found'));
 
         //Act
         $response = $this->getJson('/api/contacts');

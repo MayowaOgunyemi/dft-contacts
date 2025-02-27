@@ -33,13 +33,15 @@ class ContactController
      */
     public function index():JsonResponse
     {
-        $contacts = $this->contactService->getAllContacts();
-        if (!$contacts){
-            return response()->json(['message' => 'No contacts found'], 404);
+
+        try {
+            $contacts = $this->contactService->getAllContacts();
+            return response()->json([
+                'data' => $contacts
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
         }
-        return response()->json([
-            'data' => $contacts
-        ], 200);
     }
 
         
@@ -47,20 +49,20 @@ class ContactController
      * Method store
      * Description: Create a new contact
      *
-     * @param ContactData $contactData [explicite description]
+     * @param Request $request [explicite description]
      * @return ContactData
      */
-    public function store(ContactData $contactData): JsonResponse
+    public function store(Request $request): JsonResponse
     {
+        $contactData = ContactData::from($request->all());
         $contact = $this->contactService->createContact($contactData);
         return response()->json(ContactData::from($contact));
     }
-    
     /**
      * Method show
      * Description: Display the specified resource.
      *
-     * @param string $id [explicite description]
+     * @param int $id [explicite description]
      * @return ContactData
      */
     public function show(int $id): JsonResponse
@@ -78,14 +80,15 @@ class ContactController
      * Description: Update the specified resource in storage.
      *
      * @param int $id [explicite description]
-     * @param ContactData $contactData [explicite description]
+     * @param Request $request [explicite description]
      *
      * @return ContactData
      */
-    public function update(int $id, ContactData $contactData)
+    public function update(int $id, Request $request): JsonResponse
     {
+        $contactData = ContactData::from($request->all());
         $contact = $this->contactService->updateContact($id, $contactData);
-        return ContactData::from($contact);
+        return response()->json(ContactData::from($contact));
     }
     
     /**
