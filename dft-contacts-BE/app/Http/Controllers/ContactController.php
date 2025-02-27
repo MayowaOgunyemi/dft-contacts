@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Data\ContactData;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Interfaces\ContactServiceInterface;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -29,10 +31,15 @@ class ContactController
      *
      * @return AnonymousResourceCollection
      */
-    public function index()
+    public function index():JsonResponse
     {
         $contacts = $this->contactService->getAllContacts();
-        return ContactData::collection($contacts->item());
+        if (!$contacts){
+            return response()->json(['message' => 'No contacts found'], 404);
+        }
+        return response()->json([
+            'data' => $contacts
+        ], 200);
     }
 
         
@@ -43,11 +50,10 @@ class ContactController
      * @param ContactData $contactData [explicite description]
      * @return ContactData
      */
-    public function store(Request $request)
+    public function store(ContactData $contactData): JsonResponse
     {
-        $contactData = ContactData::from($request->all());
         $contact = $this->contactService->createContact($contactData);
-        return ContactData::from($contact);
+        return response()->json(ContactData::from($contact));
     }
     
     /**
@@ -57,10 +63,14 @@ class ContactController
      * @param string $id [explicite description]
      * @return ContactData
      */
-    public function show(int $id)
+    public function show(int $id): JsonResponse
     {
-        $contact = $this->contactService->getContactById($id);
-        return ContactData::from($contact);
+        try {
+            $contact = $this->contactService->findContactById($id);
+            return response()->json(ContactData::from($contact));
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
     }
     
     /**
@@ -88,10 +98,12 @@ class ContactController
      */
     public function destroy(int $id)
     {
-        $contact = $this->contactService->deleteContact($id);
-        return response()->json([
-            'message' => 'Contact deleted successfully.'
-        ], 204);
+        try {
+            $this->contactService->deleteContact($id);
+            return response()->json(null, 204); // 204 No Content
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
     }
     
     /**
@@ -102,10 +114,11 @@ class ContactController
      *
      * @return ContactData
      */
-    public function search(Request $request)
+    public function search(ContactData $contactData): AnonymousResourceCollection
     {
-        $term = $request->query('term'); // Get the term from query params
-        $contacts = $this->contactService->searchContacts(['term' => $term]);
-        return ContactData::collection($contacts);
+        $contacts = $this->contactService->searchContacts($contactData);
+        return response()->json([
+            'data' => $contacts
+        ], 200);
     }
 }
