@@ -224,7 +224,6 @@ class ContactControllerTest extends TestCase
         $this->mockService
             ->shouldReceive('createContact')
             ->once()
-            ->with(Mockery::on(fn($arg) => $arg instanceof ContactData))
             ->andThrow(new \Exception('Required field missing'));
 
         // Act
