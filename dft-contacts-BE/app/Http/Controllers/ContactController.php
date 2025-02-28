@@ -7,6 +7,7 @@ use App\Data\ContactData;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Interfaces\ContactServiceInterface;
+use Spatie\LaravelData\Exceptions\CannotCreateData;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ContactController
@@ -55,8 +56,13 @@ class ContactController
     public function store(Request $request): JsonResponse
     {
         $contactData = ContactData::from($request->all());
-        $contact = $this->contactService->createContact($contactData);
-        return response()->json(ContactData::from($contact));
+        try {
+            $contact = $this->contactService->createContact($contactData);
+            return response()->json(ContactData::from($contact), 201); // 201 Created
+        } catch (Exception $e) {
+            // Handle the specific exception thrown by Spatie Data
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
     /**
      * Method show
@@ -86,9 +92,13 @@ class ContactController
      */
     public function update(int $id, Request $request): JsonResponse
     {
-        $contactData = ContactData::from($request->all());
-        $contact = $this->contactService->updateContact($id, $contactData);
-        return response()->json(ContactData::from($contact));
+        try {
+            $contactData = ContactData::from($request->all());
+            $contact = $this->contactService->updateContact($id, $contactData);
+            return response()->json(ContactData::from($contact));
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
     }
     
     /**
@@ -119,9 +129,14 @@ class ContactController
      */
     public function search(ContactData $contactData): AnonymousResourceCollection
     {
-        $contacts = $this->contactService->searchContacts($contactData);
-        return response()->json([
-            'data' => $contacts
-        ], 200);
+        try {
+            $contacts = $this->contactService->searchContacts($contactData);
+            return response()->json([
+                'data' => $contacts
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+            
     }
 }
