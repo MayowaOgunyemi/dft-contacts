@@ -104,8 +104,8 @@ class ContactService implements ContactServiceInterface
      *
      * @return LengthAwarePaginator
      */
-    public function searchContacts(string $contactData): LengthAwarePaginator
+    public function searchContacts(string $term): LengthAwarePaginator
     {
-        return $this->contactRepository->search($contactData);
+        return $this->contactRepository->search($term);
     }
 }

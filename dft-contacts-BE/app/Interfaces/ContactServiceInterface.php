@@ -58,5 +58,5 @@ interface ContactServiceInterface
      *
      * @return LengthAwarePaginator
      */
-    public function searchContacts(string $contactData): LengthAwarePaginator;
+    public function searchContacts(string $term): LengthAwarePaginator;
 }

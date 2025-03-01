@@ -127,10 +127,11 @@ class ContactController
      *
      * @return ContactData
      */
-    public function search(ContactData $contactData): AnonymousResourceCollection
+    public function search(Request $request): AnonymousResourceCollection
     {
+        $searchQuery = $request->query('query');
         try {
-            $contacts = $this->contactService->searchContacts($contactData);
+            $contacts = $this->contactService->searchContacts($searchTerm);
             return response()->json([
                 'data' => $contacts
             ], 200);

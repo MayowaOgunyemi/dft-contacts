@@ -8,9 +8,7 @@ use App\Models\Contact;
 use App\Data\ContactData;
 use App\Interfaces\ContactServiceInterface;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Spatie\LaravelData\Exceptions\CannotCreateData;
 
 class ContactControllerTest extends TestCase
 {
