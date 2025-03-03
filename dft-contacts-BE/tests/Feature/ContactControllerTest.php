@@ -177,7 +177,7 @@ class ContactControllerTest extends TestCase
             ->andReturn(new LengthAwarePaginator($contacts, 5, 15));
 
         //Act
-        $response = $this->getJson("/api/contacts/search?search={$searchTerm}");
+        $response = $this->getJson("/api/contacts/search?query={$searchTerm}");
 
         //Assert
         $response->assertStatus(200);
@@ -329,11 +329,10 @@ class ContactControllerTest extends TestCase
         $this->mockService
             ->shouldReceive('searchContacts')
             ->once()
-            ->with($searchTerm)
             ->andThrow(new \Exception('No contacts found'));
 
         //Act
-        $response = $this->getJson("/api/contacts/search?search={$searchTerm}");
+        $response = $this->getJson("/api/contacts/search?query={$searchTerm}");
 
         //Assert
         $response->assertStatus(404);

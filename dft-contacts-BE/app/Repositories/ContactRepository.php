@@ -103,7 +103,7 @@ class ContactRepository implements ContactRepositoryInterface
      */
     public function search(string $contactData): LengthAwarePaginator
     {
-        return Contact::where('name', 'like', "%$contactData%")
+        return Contact::where('fname', 'like', "%$contactData%")
             ->orWhere('email', 'like', "%$contactData%")
             ->orderBy('id', 'desc')
             ->paginate();
