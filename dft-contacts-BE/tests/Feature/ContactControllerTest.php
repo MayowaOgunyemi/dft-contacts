@@ -30,6 +30,7 @@ class ContactControllerTest extends TestCase
 
         // Mock the service interface
         $this->mockService = Mockery::mock(ContactServiceInterface::class);
+        // Bind the service interface to the mock service
         $this->app->instance(ContactServiceInterface::class, $this->mockService);
     }
 

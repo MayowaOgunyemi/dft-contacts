@@ -23,6 +23,7 @@ class ContactServiceTest extends TestCase
 
         // Mock the repository interface
         $this->mockRepository = Mockery::mock(ContactRepositoryInterface::class);
+        // Instantiate the ContactService with the mocked repository
         $this->contactService = new ContactService($this->mockRepository);
     }
 

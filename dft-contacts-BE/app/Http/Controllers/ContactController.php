@@ -7,8 +7,6 @@ use App\Data\ContactData;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Interfaces\ContactServiceInterface;
-use Spatie\LaravelData\Exceptions\CannotCreateData;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ContactController
 {
@@ -30,7 +28,7 @@ class ContactController
      * Method index
      * Description: Get all cocntacts
      *
-     * @return AnonymousResourceCollection
+     * @return JsonResponse
      */
     public function index():JsonResponse
     {
@@ -51,7 +49,7 @@ class ContactController
      * Description: Create a new contact
      *
      * @param Request $request [explicite description]
-     * @return ContactData
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -69,7 +67,7 @@ class ContactController
      * Description: Display the specified resource.
      *
      * @param int $id [explicite description]
-     * @return ContactData
+     * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -113,7 +111,7 @@ class ContactController
     {
         try {
             $this->contactService->deleteContact($id);
-            return response()->json(null, 204); // 204 No Content
+            return response()->json([null], 204); // 204 No Content
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 404);
         }
@@ -127,14 +125,11 @@ class ContactController
      *
      * @return ContactData
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
-        // dd($request);
         $searchTerm = $request->query('query');
-        // dd($searchTerm);
         try {
             $contacts = $this->contactService->searchContacts($searchTerm);
-            // dd($contacts);
             return response()->json([
                 'data' => $contacts
             ], 200);
